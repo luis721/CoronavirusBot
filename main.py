@@ -10,6 +10,8 @@ def main():
     # se añaden los métodos que controlan cada comando
     dispatcher.add_handler(CommandHandler('start', bot.start))
     dispatcher.add_handler(CommandHandler('total', bot.total))
+    dispatcher.add_handler(CommandHandler('mapa', bot.mapa))
+    dispatcher.add_handler(CommandHandler('muertes', bot.muertes))
     # for inline queries
     dispatcher.add_handler(InlineQueryHandler(bot.inline_query))
     dispatcher.add_error_handler(bot.error)

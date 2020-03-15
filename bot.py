@@ -1,7 +1,10 @@
+import os
 import logging
 import requests
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from uuid import uuid4
+from mapa import crear_imagen
+from datetime import datetime, timedelta
 
 URL_ALL = 'https://corona.lmao.ninja/all'
 URL_COUNTRIES = 'https://corona.lmao.ninja/countries/'
@@ -54,6 +57,32 @@ def start(update, context):
         'muertos y recuperados de el Coronavirus en Colombia. :-)')
 
 
+def mapa(update, context):
+    chat_id = update.message.chat.id
+    FILE = "mapa.png"
+    # TODO verificar si el archivo existe
+    fecha = os.path.getmtime(FILE)
+    diff = datetime.fromtimestamp(fecha) - datetime.now()
+    delta = timedelta(minutes=30)
+    if diff > delta:
+        crear_imagen()
+
+    context.bot.send_photo(chat_id, open(FILE, 'rb'))
+
+
+def muertes(update, context):
+    chat_id = update.message.chat.id
+    FILE = "muertes.png"
+    # TODO verificar si el archivo existe
+    fecha = os.path.getmtime(FILE)
+    diff = datetime.fromtimestamp(fecha) - datetime.now()
+    delta = timedelta(minutes=30)
+    if diff > delta:
+        crear_imagen(criteria='deaths', filename=FILE)
+
+    context.bot.send_photo(chat_id, open(FILE, 'rb'))
+
+
 def inline_query(update, context):
     results = [
         InlineQueryResultArticle(
@@ -78,6 +107,7 @@ def inline_query(update, context):
     ]
 
     update.inline_query.answer(results)
+
 
 def error(update, context):
     """Log Errors caused by Updates."""
