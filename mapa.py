@@ -1,4 +1,5 @@
 # Graphics
+from auth import API_KEY, API_SECRET, CLOUD_NAME
 import requests
 import matplotlib
 import matplotlib.pyplot as plt
@@ -7,6 +8,15 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import cartopy.io.shapereader as shpreader
 from datetime import datetime
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+
+cloudinary.config(
+    cloud_name=CLOUD_NAME,
+    api_key=API_KEY,
+    api_secret=API_SECRET
+)
 
 matplotlib.use('Agg')
 
@@ -59,7 +69,7 @@ def scale_muertes(muertes):
         return 0.9
 
 
-def crear_imagen(criteria='cases', filename='mapa.png'):
+def crear_imagen(criteria='cases', filename='mapa.jpg'):
     resp = requests.get(URL_COUNTRIES)
     paises = {}
     for item in resp.json():
@@ -106,3 +116,5 @@ def crear_imagen(criteria='cases', filename='mapa.png'):
                               label=country.attributes['ADM0_A3'])
 
     plt.savefig(filename)
+    cloudinary.uploader.upload(file=open(filename, 'rb'), public_id=filename, overwrite=True)
+    print(cloudinary.api.resource(filename)['url'])

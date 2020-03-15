@@ -1,5 +1,7 @@
+cloudinary
 matplotlib
 cartopy
 requests
 python_telegram_bot
 telegram
+pillow

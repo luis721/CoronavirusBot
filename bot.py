@@ -1,7 +1,11 @@
+import sys, traceback
+
+import cloudinary
 import os
 import logging
 import requests
-from telegram import InlineQueryResultArticle, InputTextMessageContent
+import telegram
+from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultPhoto
 from uuid import uuid4
 from mapa import crear_imagen
 from datetime import datetime, timedelta
@@ -59,11 +63,11 @@ def start(update, context):
 
 def mapa(update, context):
     chat_id = update.message.chat.id
-    FILE = "mapa.png"
+    FILE = "mapa.jpg"
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
     diff = datetime.fromtimestamp(fecha) - datetime.now()
-    delta = timedelta(minutes=30)
+    delta = timedelta(minutes=10)
     if diff > delta:
         crear_imagen()
 
@@ -72,18 +76,23 @@ def mapa(update, context):
 
 def muertes(update, context):
     chat_id = update.message.chat.id
-    FILE = "muertes.png"
+    FILE = "muertes.jpg"
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
     diff = datetime.fromtimestamp(fecha) - datetime.now()
-    delta = timedelta(minutes=30)
+    delta = timedelta(minutes=10)
     if diff > delta:
         crear_imagen(criteria='deaths', filename=FILE)
 
     context.bot.send_photo(chat_id, open(FILE, 'rb'))
 
 
+def url_from_name(filename):
+    return cloudinary.api.resource(filename)['url']
+
+
 def inline_query(update, context):
+
     results = [
         InlineQueryResultArticle(
             id=uuid4(),
@@ -104,8 +113,21 @@ def inline_query(update, context):
             id=uuid4(),
             title="Recuperados",
             input_message_content=InputTextMessageContent(recuperados())),
+        InlineQueryResultPhoto(
+            id=uuid4(),
+            title="Mapa de Casos",
+            caption="Mapa de Casos",
+            description="Mapa de Casos",
+            photo_url=url_from_name('mapa.jpg'),
+            thumb_url='https://res.cloudinary.com/dlyc7rdxt/image/upload/ar_1:1,b_rgb:262c35,bo_5px_solid_rgb:ff0000,c_fill,g_auto,r_max,t_media_lib_thumb,w_100/v1584293147/coronavirus_w28z7e.jpg'),
+        InlineQueryResultPhoto(
+            id=uuid4(),
+            title="Mapa de Muertes",
+            caption="Mapa de Muertes",
+            description="Mapa de Muertes",
+            photo_url=url_from_name('muertes.jpg'),
+            thumb_url='https://res.cloudinary.com/dlyc7rdxt/image/upload/ar_1:1,b_rgb:262c35,bo_5px_solid_rgb:ff0000,c_fill,g_auto,r_max,t_media_lib_thumb,w_100/v1584293147/coronavirus_w28z7e.jpg'),
     ]
-
     update.inline_query.answer(results)
 
 
