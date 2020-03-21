@@ -21,10 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def consulta(pais='Colombia'):
-    resp = requests.get(URL_COUNTRIES)
-    for item in resp.json():
-        if item['country'] == pais:
-            return item
+    return requests.get(URL_COUNTRIES + pais).json()
 
 
 def total():
@@ -67,7 +64,7 @@ def mapa(update, context):
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
     diff = datetime.fromtimestamp(fecha) - datetime.now()
-    delta = timedelta(minutes=10)
+    delta = timedelta(hours=120)
     if diff > delta:
         crear_imagen()
 
