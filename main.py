@@ -1,6 +1,6 @@
 from auth import TOKEN
 import bot
-from telegram.ext import Updater, CommandHandler, InlineQueryHandler
+from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 
 
 def main():
@@ -15,6 +15,9 @@ def main():
     # for inline queries
     dispatcher.add_handler(InlineQueryHandler(bot.inline_query))
     dispatcher.add_error_handler(bot.error)
+    # keyboard
+    dispatcher.add_handler(CommandHandler('test', bot.test))
+    dispatcher.add_handler(CallbackQueryHandler(bot.button))
 
     # iniciar bot
     updater.start_polling()

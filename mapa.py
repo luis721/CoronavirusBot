@@ -22,6 +22,24 @@ matplotlib.use('Agg')
 
 URL_COUNTRIES = 'https://corona.lmao.ninja/countries/'
 
+# COUNTRIES WITH NO ISO INFO IN THE API
+EXCEPTIONS = {
+    'S. Korea': 'KOR',
+    'UK': 'GBR',
+    'Iran': 'IRN',
+    'Czechia': 'CZE',
+    'UAE': 'ARE',
+    'North Macedonia': 'MKD',
+    'Moldova': 'MDA',
+    'Palestine': 'PSE',
+    'DRC': 'COD',
+    'Tanzania': 'TZA',
+    'Eswatini': 'SWZ',
+    'Cabo Verde': 'CAF',
+    'Syria': 'SYR',
+    'USA': 'USA'
+}
+
 
 # TODO Usar escala LogNorm
 
@@ -73,7 +91,11 @@ def crear_imagen(criteria='cases', filename='mapa.jpg'):
     resp = requests.get(URL_COUNTRIES)
     paises = {}
     for item in resp.json():
-        nombre = item['country']
+        nombre = item['countryInfo']['iso3']
+        # countries with no iso data
+        if nombre == 'NO DATA' and item['country'] in EXCEPTIONS:
+            nombre = EXCEPTIONS[item['country']]
+
         if criteria != 'cases':
             paises[nombre] = scale_muertes(item[criteria])
         else:
@@ -103,14 +125,9 @@ def crear_imagen(criteria='cases', filename='mapa.jpg'):
     reader = shpreader.Reader(shpfilename)
     countries = reader.records()
     for country in countries:
-        nombre = country.attributes['ADMIN']
-        nom2 = country.attributes['NAME_SV']
-        if nombre in paises or nom2 in paises:
-            if nombre in paises:
-                color = cmap(paises[nombre])
-            else:
-                color = cmap(paises[nom2])
-
+        nombre = country.attributes['ISO_A3']
+        if nombre in paises:
+            color = cmap(paises[nombre])
             ax.add_geometries(country.geometry, ccrs.PlateCarree(),
                               facecolor=color,
                               label=country.attributes['ADM0_A3'])

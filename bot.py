@@ -5,7 +5,8 @@ import os
 import logging
 import requests
 import telegram
-from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultPhoto
+from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultPhoto, InlineKeyboardButton, \
+    InlineKeyboardMarkup
 from uuid import uuid4
 from mapa import crear_imagen
 from datetime import datetime, timedelta
@@ -63,8 +64,8 @@ def mapa(update, context):
     FILE = "mapa.jpg"
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
-    diff = datetime.fromtimestamp(fecha) - datetime.now()
-    delta = timedelta(hours=120)
+    diff = datetime.now() - datetime.fromtimestamp(fecha)
+    delta = timedelta(hours=2)
     if diff > delta:
         crear_imagen()
 
@@ -76,12 +77,29 @@ def muertes(update, context):
     FILE = "muertes.jpg"
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
-    diff = datetime.fromtimestamp(fecha) - datetime.now()
-    delta = timedelta(minutes=10)
+    diff = datetime.now() - datetime.fromtimestamp(fecha)
+    delta = timedelta(minutes=2)
     if diff > delta:
         crear_imagen(criteria='deaths', filename=FILE)
 
     context.bot.send_photo(chat_id, open(FILE, 'rb'))
+
+
+def test(update, context):
+    keyboard = [[InlineKeyboardButton("Option 1", callback_data='1'),
+                 InlineKeyboardButton("Option 2", callback_data='2')],
+
+                [InlineKeyboardButton("Option 3", callback_data='3')]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+
+
+def button(update, context):
+    query = update.callback_query
+
+    query.edit_message_text(text="Selected option: {}".format(query.data))
 
 
 def url_from_name(filename):
