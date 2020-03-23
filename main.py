@@ -8,6 +8,7 @@ def main():
 
     dispatcher = updater.dispatcher
     # se añaden los métodos que controlan cada comando
+    # TODO add active cases maps
     dispatcher.add_handler(CommandHandler('start', bot.start))
     dispatcher.add_handler(CommandHandler('total', bot.total))
     dispatcher.add_handler(CommandHandler('mapa', bot.mapa))

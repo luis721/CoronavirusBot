@@ -78,7 +78,7 @@ def muertes(update, context):
     # TODO verificar si el archivo existe
     fecha = os.path.getmtime(FILE)
     diff = datetime.now() - datetime.fromtimestamp(fecha)
-    delta = timedelta(minutes=2)
+    delta = timedelta(hours=2)
     if diff > delta:
         crear_imagen(criteria='deaths', filename=FILE)
 

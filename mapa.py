@@ -3,7 +3,7 @@ from auth import API_KEY, API_SECRET, CLOUD_NAME
 import requests
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib import cm, colors
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import cartopy.io.shapereader as shpreader
@@ -41,68 +41,29 @@ EXCEPTIONS = {
 }
 
 
-# TODO Usar escala LogNorm
-
-def scale(casos):
-    if casos < 100:
-        return 0.2
-    if casos < 200:
-        return 0.3
-    if casos < 400:
-        return 0.4
-    elif casos < 500:
-        return 0.5
-    elif casos < 1000:
-        return 0.6
-    elif casos < 5000:
-        return 0.7
-    elif casos < 10000:
-        return 0.8
-    elif casos < 15000:
-        return 0.85
-    else:
-        return 0.9
-
-
-def scale_muertes(muertes):
-    if muertes == 0:
-        return 0
-    if muertes < 10:
-        return 0.2
-    if muertes < 20:
-        return 0.3
-    if muertes < 40:
-        return 0.4
-    elif muertes < 50:
-        return 0.5
-    elif muertes < 100:
-        return 0.6
-    elif muertes < 500:
-        return 0.7
-    elif muertes < 1000:
-        return 0.8
-    elif muertes < 1500:
-        return 0.85
-    else:
-        return 0.9
-
-
-def crear_imagen(criteria='cases', filename='mapa.jpg'):
+def get_data(criteria):
     resp = requests.get(URL_COUNTRIES)
     paises = {}
+    maxima = 0
     for item in resp.json():
         nombre = item['countryInfo']['iso3']
         # countries with no iso data
         if nombre == 'NO DATA' and item['country'] in EXCEPTIONS:
             nombre = EXCEPTIONS[item['country']]
 
-        if criteria != 'cases':
-            paises[nombre] = scale_muertes(item[criteria])
-        else:
-            paises[nombre] = scale(item[criteria])
+        paises[nombre] = item[criteria]
+        # update max number as of the criteria
+        if paises[nombre] > maxima:
+            maxima = paises[nombre]
 
+    return paises, maxima
+
+
+def crear_imagen(criteria='cases', filename='mapa.jpg'):
+    paises, maxima = get_data(criteria)
+    # LogNorm for normalizing values
+    norm = colors.LogNorm(1, maxima)
     now = datetime.now().strftime("%d-%m-%y %I:%M%p")
-
     fig = plt.figure(figsize=(10, 5))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
 
@@ -111,23 +72,25 @@ def crear_imagen(criteria='cases', filename='mapa.jpg'):
     ax.set_global()
     ax.set_title('Última actualización: %s' % now)
 
-    # ax.stock_img()
     ax.add_feature(cfeature.BORDERS, linestyle='-')
     ax.add_feature(cfeature.COASTLINE, linestyle='-')
     ax.add_feature(cfeature.OCEAN, facecolor='white')
 
+    # colormap
+    cmap = cm.get_cmap('OrRd')
+    # get countries info
     shpfilename = shpreader.natural_earth(resolution='110m',
                                           category='cultural',
                                           name='admin_0_countries')
 
-    cmap = cm.get_cmap('OrRd')
-
+    # plot countries
     reader = shpreader.Reader(shpfilename)
     countries = reader.records()
     for country in countries:
         nombre = country.attributes['ISO_A3']
         if nombre in paises:
-            color = cmap(paises[nombre])
+            # decide color based in the number of the criteria
+            color = cmap(norm(paises[nombre]))
             ax.add_geometries(country.geometry, ccrs.PlateCarree(),
                               facecolor=color,
                               label=country.attributes['ADM0_A3'])
