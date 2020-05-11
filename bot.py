@@ -1,5 +1,5 @@
 import sys, traceback
-
+from config import URL_COUNTRIES, URL_ALL
 import cloudinary
 import os
 import logging
@@ -11,8 +11,7 @@ from uuid import uuid4
 from mapa import crear_imagen
 from datetime import datetime, timedelta
 
-URL_ALL = 'https://corona.lmao.ninja/all'
-URL_COUNTRIES = 'https://corona.lmao.ninja/countries/'
+
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -56,7 +55,7 @@ def muertos():
 def start(update, context):
     update.message.reply_text(
         'Bienvenido a este bot que le brinda información sobre los casos de enfermos, '
-        'muertos y recuperados de el Coronavirus en Colombia. :-)')
+        'muertos y recuperados del Coronavirus en Colombia. :-)')
 
 
 def mapa(update, context):

@@ -1,5 +1,6 @@
 # Graphics
 from auth import API_KEY, API_SECRET, CLOUD_NAME
+from config import URL_COUNTRIES
 import requests
 import matplotlib
 import matplotlib.pyplot as plt
@@ -19,8 +20,6 @@ cloudinary.config(
 )
 
 matplotlib.use('Agg')
-
-URL_COUNTRIES = 'https://corona.lmao.ninja/countries/'
 
 # COUNTRIES WITH NO ISO INFO IN THE API
 EXCEPTIONS = {
