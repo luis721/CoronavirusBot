@@ -3,5 +3,5 @@ matplotlib
 cartopy
 requests
 python_telegram_bot
-telegram
+numpy
 pillow
