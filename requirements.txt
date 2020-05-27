@@ -1,7 +1,7 @@
-cloudinary
+numpy
 matplotlib
 cartopy
 requests
 python_telegram_bot
-numpy
 pillow
+cloudinary
